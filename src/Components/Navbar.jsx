@@ -2,7 +2,7 @@ const Navbar = () => {
   return (
     <div className="mt-4 w-[90%] sm:w-[85%] md:w-[80%] h-auto md:h-[8%] rounded-[8px] border-[2px] border-[#6453DD] mx-auto flex flex-col md:flex-row justify-between items-center tracking-wide p-3 md:p-0 gap-3 md:gap-0">
       {/* Logo */}
-      <div className="text-xl sm:text-2xl md:text-3xl text-center orbitron font-bold text-[#FFFFFF] leading-[100%] ml-10">
+      <div className="text-xl sm:text-2xl md:text-4xl text-center orbitron font-bold text-[#FFFFFF] leading-[100%] ml-5">
         NCC
       </div>
 
@@ -35,8 +35,8 @@ const Navbar = () => {
       </div>
 
       {/* Button */}
-      <div className="p-1 md:p-3">
-        <button className="bg-[#6453DD] orbitron px-3 py-2 sm:px-4 sm:py-2 md:p-4 rounded-[8px] text-[0.7rem] sm:text-sm md:text-xs text-center font-bold text-[#FFFFFF] leading-[100%] hover:bg-[#7162e0]">
+      <div className="p-1 md:p-2">
+        <button className="bg-[#6453DD] orbitron px-3 py-2 sm:px-4 sm:py-2 md:p-4 rounded-[8px] text-[0.7rem] sm:text-sm md:text-md text-center font-bold text-[#FFFFFF] leading-[100%] hover:bg-[#7162e0] cursor-pointer">
           LOGOUT
         </button>
       </div>
