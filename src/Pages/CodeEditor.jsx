@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import Editor from "@monaco-editor/react";
 
-import Navbar from "../components/NavBar";
+import Navbar from "../Components/Navbar";
 
 
 
