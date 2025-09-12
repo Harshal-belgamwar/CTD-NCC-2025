@@ -1,9 +1,9 @@
 import { useState } from "react";
 
-import Navbar from "../Components/NavBar";
+import Navbar from "../components/NavBar";
 import { FaArrowLeft, FaArrowRight } from "react-icons/fa";
 
-function Leaderboard(){
+function Leaderboard() {
   const students = [
     {
       username: "Noobmaster",

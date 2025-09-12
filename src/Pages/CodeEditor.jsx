@@ -1,6 +1,10 @@
 import { useState, useEffect } from "react";
 import Editor from "@monaco-editor/react";
-import Navbar from "../Components/NavBar";
+
+import Navbar from "../components/NavBar";
+
+
+
 import axios from "axios";
 
 const CodeEditor = () => {

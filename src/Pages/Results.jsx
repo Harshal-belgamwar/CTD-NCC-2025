@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-import Navbar from "../Components/NavBar";
+import Navbar from "../components/NavBar";
 import alien from "../assets/alien.png";
 
 function Results() {
