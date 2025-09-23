@@ -1,4 +1,6 @@
 import Navbar from "../Components/Navbar";
+import { useNavigate } from "react-router-dom";
+
 
 const instructionsData = [
     {
@@ -29,6 +31,8 @@ const InstructionItem = ({ number, text }) => {
 };
 
 const Instructions = () => {
+    const navigate = useNavigate();
+
     return (
         <div className='flex flex-col min-h-screen bg-gradient-to-b from-[#2A2255] to-[#0C091F] items-center justify-center tracking-wider' >
             <Navbar />
@@ -41,7 +45,10 @@ const Instructions = () => {
                         <InstructionItem key={item.number} number={item.number} text={item.text} />
                     ))}
                 </div>
-                <button className='text-white font-bold bg-[#6435DD] border-[2px] border-[#6435DD] mt-6 py-3 px-15 rounded-[5px] hover:bg-[#0C091F] transition-colors tracking-widest cursor-pointer duration-300'>
+                <button 
+                className='text-white font-bold bg-[#6435DD] border-[2px] border-[#6435DD] mt-6 py-3 px-15 rounded-[5px] hover:bg-[#0C091F] transition-colors tracking-widest cursor-pointer duration-300'
+                onClick={()=>navigate('/question-hub')}
+                >
                     PROCEED
                 </button>
             </div>

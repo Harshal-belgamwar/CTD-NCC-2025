@@ -60,7 +60,9 @@ const Navbar = () => {
 
         {/* Button */}
         <div className="p-1 md:p-2">
-          <button className="bg-[#6453DD] border-[2px] border-[#6435DD] px-3 py-2 sm:px-4 sm:py-2 md:p-4 rounded-[5px] text-[0.7rem] sm:text-sm md:text-md text-center font-bold text-white leading-[100%] hover:bg-transparent hover:text-violet-300 cursor-pointer duration-200">
+          <button className="bg-[#6453DD] border-[2px] border-[#6435DD] px-3 py-2 sm:px-4 sm:py-2 md:p-4 rounded-[5px] text-[0.7rem] sm:text-sm md:text-md text-center font-bold text-white leading-[100%] hover:bg-transparent hover:text-violet-300 cursor-pointer duration-200"
+            
+          >
             LOGOUT
           </button>
         </div>
