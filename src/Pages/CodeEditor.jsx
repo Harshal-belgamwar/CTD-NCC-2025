@@ -3,7 +3,8 @@ import { useState, useEffect, useRef } from "react";
 import Editor from "@monaco-editor/react";
 import Navbar from "../Components/Navbar";
 import axios from "axios";
-import { useLocation , useNavigate} from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
+import file from "../assets/file.svg";
 import { io } from "socket.io-client";
 
 const BACKEND_URL = "http://localhost:3000";
@@ -20,19 +21,20 @@ const CodeEditor = () => {
   const languages = ["cpp", "java", "python"];
   const [language, setLanguage] = useState("python");
   const [question, setQuestion] = useState({});
-  const [code, setCode] = useState("");
+
   const [output, setOutput] = useState("");
   const [customInput, setCustomInput] = useState("");
 
+  const [code, setCode] = useState("");
   const [submissionId, setSubmissionId] = useState(null);
   const [submitResult, setSubmitResult] = useState(null);
-  const [submitSubmissionId, setSubmitSubmissionId] = useState(0);
+  const [submitSubmissionId, setSubmitSubmissionId] = useState(null);
 
   const leftColRef = useRef(null);
   const [editorHeight, setEditorHeight] = useState("500px");
 
   const location = useLocation();
-  const questionIndex = location.state?.questionIndex;
+  const questionIndex = location.state?.problem_id;
 
   const navigate = useNavigate();
 
@@ -117,12 +119,12 @@ int main() {
     });
 
     socket.on("result", (data) => {
-      if (data.user_output) setOutput(data.user_output);
-      else if (data.status === "runtime_error")
-        setOutput("Runtime Error:\n" + data.stderr);
-      else if (data.compile_output)
-        setOutput("Compilation Error:\n" + data.compile_output);
-      else setOutput("No output received.");
+      if (data.user_output) {
+        setOutput(data.user_output);
+      } else {
+        console.log("data:", data);
+        setOutput(`${data.status} : ${data.message}`);
+      }
     });
 
     return () => socket.disconnect();
@@ -143,6 +145,7 @@ int main() {
     });
 
     socket.on("result", (data) => {
+      setSubmitSubmissionId(null);
       const parsedData = {
         status: data.status || "unknown",
         message: data.message || "",
@@ -152,6 +155,12 @@ int main() {
       };
       console.log("Submission result received:", parsedData);
       setSubmitResult(parsedData); // contains array of test cases, score, status
+      if (
+        parsedData.status === "accepted" &&
+        !localStorage.getItem(`solved_${questionIndex}`)
+      ) {
+        localStorage.setItem(`solved_${questionIndex}`, "solved");
+      }
     });
 
     return () => socket.disconnect();
@@ -175,14 +184,18 @@ int main() {
         withCredentials: true,
       });
       const data = res.data;
-      if (data.submission_id) setSubmissionId(data.submission_id);
+      if (data.submission_id) setSubmissionId(res.data.submission_id);
     } catch (err) {
+      if (err.response.status === 403) {
+        navigate("/results");
+      }
       setOutput("Error: " + (err.response?.data?.message || err.message));
     }
   };
 
   // Submit code
   const submitCode = async () => {
+    setSubmissionId(null);
     setSubmitResult(null);
 
     try {
@@ -197,14 +210,12 @@ int main() {
         { withCredentials: true }
       );
 
-      
       console.log(res.error);
 
       // Save submission_id to trigger useEffect
       setSubmitSubmissionId(res.data.submission_id);
     } catch (err) {
-
-      if(err.response.status === 403){
+      if (err.response.status === 403) {
         navigate("/results");
       }
 
@@ -236,15 +247,36 @@ int main() {
         </select>
       </div>
 
+      <div className="w-full lg:w-1/2 flex flex-row gap-3  h-[30%] border border-white mt-5 p-4 text-white">
+        <div className="w-[20%] bg-[#2A2255] h-full flex justify-center">
+          Description
+        </div>
+        <div className="w-[30%] bg-[#2A2255] h-full flex justify-center">
+          Submissions
+        </div>
+      </div>
+
       <div className="w-full flex flex-col lg:flex-row gap-6 p-4">
         {/* Left column */}
         <div
           className="w-full lg:w-1/2 h-full flex flex-col overflow-y-auto p-6 bg-[#0C091F]/40 rounded-lg shadow-md"
           ref={leftColRef}
         >
-          <h2 className="orbitron text-xl sm:text-2xl md:text-3xl text-white font-bold">
-            {question?.title || "Sample Problem Title"}
-          </h2>
+          <div className="flex justify-between">
+            <h2 className="orbitron text-xl sm:text-2xl md:text-3xl text-white font-bold">
+              {question?.title || "Sample Problem Title"}
+            </h2>
+            {localStorage.getItem(`solved_${questionIndex}`) === "solved" && (
+              <div>
+                <img
+                  src={file}
+                  alt="Solved"
+                  className=" w-8 h-8 mb-2 rounded-full "
+                />
+              </div>
+            )}
+          </div>
+
           <p className="orbitron mt-3 text-lg font-semibold sm:text-base md:text-base text-white">
             Score: {question?.score || 0}
           </p>
@@ -321,8 +353,10 @@ int main() {
                 insertSpaces: true,
                 detectIndentation: false,
                 quickSuggestions: false,
+                contextmenu: false,
               }}
               onMount={(editor, monaco) => {
+                // Define theme
                 monaco.editor.defineTheme("blue-theme", {
                   base: "vs-dark",
                   inherit: true,
@@ -347,97 +381,110 @@ int main() {
                   },
                 });
                 monaco.editor.setTheme("blue-theme");
-                editor.addCommand(monaco.KeyCode.Tab, () => {});
+
+                // Disable Tab key default behavior
+                editor.addCommand(monaco.KeyCode.Tab, () => {
+                  editor.trigger("keyboard", "type", { text: "  " });
+                });
               }}
               theme="blue-theme"
             />
           </div>
 
           {/* Custom input */}
-          <textarea
-            value={customInput}
-            onChange={(e) => setCustomInput(e.target.value)}
-            placeholder="Enter custom input..."
-            className="w-full h-[120px] p-3 bg-[#0C091F66]/40 text-white rounded-lg resize-none focus:outline-none border border-[#6435DD]"
-          />
-
-          {/* Output */}
-          <div className="w-full h-[120px] text-white orbitron text-sm sm:text-base md:text-lg p-4 overflow-y-auto bg-[#0C091F66]/40 rounded-lg border border-[#6435DD]">
-            <div>Output: </div>
-            <pre>{output === null ? "Running..." : output}</pre>
-          </div>
-
-          {/* Submit Results */}
-          {submitResult && (
-            <div className=" oxanium mt-4 p-4 border border-[#6435DD] rounded-md bg-[#2A2255]/30 text-white">
-              <p className="font-bold mb-2">
-                Status:{" "}
-                <span
-                  className={
-                    submitResult.status?.toLowerCase() === "accepted"
-                      ? "text-green-500"
-                      : "text-red-500"
-                  }
-                >
-                  {submitResult.status}
-                </span>{" "}
-                | Score: {submitResult.score ?? 0}
-              </p>
-              <p className="mb-3">
-                {submitResult.failed_test_case === 0
-                  ? `All ${submitResult.total_test_case} test cases passed`
-                  : `${submitResult.failed_test_case - 1} / ${
-                      submitResult.total_test_case
-                    } test cases passed`}
-              </p>
-              <div className="space-y-2">
-                {Array.from({ length: submitResult.total_test_case }).map(
-                  (_, idx) => {
-                    let statusClass = "text-white";
-                    let text = `Test Case ${idx + 1}`;
-
-                    if (
-                      submitResult.failed_test_case === 0 ||
-                      idx + 1 < submitResult.failed_test_case
-                    ) {
-                      statusClass = "text-green-400";
-                      text += ": PASSED";
-                    } else if (idx + 1 === submitResult.failed_test_case) {
-                      statusClass = "text-red-500";
-                      text += ": FAILED";
+          <div className="space-y-4">
+            {submitResult ? (
+              // Submission Results Block
+              <div className="oxanium mt-4 p-4 border border-[#6435DD] rounded-md bg-[#2A2255]/30 text-white">
+                <p className="font-bold mb-2">
+                  Status:{" "}
+                  <span
+                    className={
+                      submitResult.status?.toLowerCase() === "accepted"
+                        ? "text-green-500"
+                        : "text-red-500"
                     }
+                  >
+                    {submitResult.status}
+                  </span>{" "}
+                  | Score: {submitResult.score ?? 0}
+                </p>
+                <p className="mb-3">
+                  {submitResult.failed_test_case === 0
+                    ? `All ${submitResult.total_test_case} test cases passed`
+                    : `${submitResult.failed_test_case - 1} / ${
+                        submitResult.total_test_case
+                      } test cases passed`}
+                </p>
+                <div className="space-y-2">
+                  {Array.from({ length: submitResult.total_test_case }).map(
+                    (_, idx) => {
+                      let statusClass = "text-white";
+                      let text = `Test Case ${idx + 1}`;
 
-                    return (
-                      <div
-                        key={idx + 1}
-                        className="p-2 border border-[#6435DD] rounded-md"
-                      >
-                        <p className={statusClass}>{text}</p>
-                        {/* {idx+1 === submitResult.failed_test_case &&
-                          submitResult.message && (
-                            <p className="text-red-400 text-sm">
-                              Error: {submitResult.message}
-                            </p>
-                          )} */}
-                      </div>
-                    );
-                  }
-                )}
+                      if (
+                        submitResult.failed_test_case === 0 ||
+                        idx + 1 < submitResult.failed_test_case
+                      ) {
+                        statusClass = "text-green-400";
+                        text += ": PASSED";
+                      } else if (idx + 1 === submitResult.failed_test_case) {
+                        statusClass = "text-red-500";
+                        text += ": FAILED";
+                      }
+
+                      return (
+                        <div
+                          key={idx + 1}
+                          className="p-2 border border-[#6435DD] rounded-md"
+                        >
+                          <p className={statusClass}>{text}</p>
+                        </div>
+                      );
+                    }
+                  )}
+                </div>
+
+                
               </div>
-            </div>
-          )}
+            ) : (
+              // Custom/Test Case Input with Output
+              <>
+                <textarea
+                  value={customInput}
+                  onChange={(e) => setCustomInput(e.target.value)}
+                  placeholder="Enter custom input..."
+                  className="w-full h-[120px] p-3 bg-[#0C091F66]/40 text-white rounded-lg resize-none focus:outline-none border border-[#6435DD]"
+                />
+
+                {/* Output */}
+                <div className="w-full h-[120px] text-white orbitron text-sm sm:text-base md:text-lg p-4 overflow-y-auto bg-[#0C091F66]/40 rounded-lg border border-[#6435DD]">
+                  <div>Output: </div>
+                  <pre>{output === null ? "" : output}</pre>
+                </div>
+              </>
+            )}
+          </div>
 
           {/* Buttons */}
           <div className="mt-2 flex gap-3 justify-end text-white font-bold text-xl">
             <button
               onClick={runCode}
-              className="w-[150px] h-[50px] bg-[#6435DD] border-2 border-[#6435DD] rounded-md hover:bg-[#361D77] transition-colors shadow-md"
+              disabled={Boolean(submissionId) && !output}
+              className="w-[150px] h-[50px] bg-[#6435DD] disabled:bg-[#361D77] disabled:cursor-not-allowed border-2 border-[#6435DD] rounded-md hover:bg-[#361D77] transition-colors shadow-md"
             >
               Run
             </button>
             <button
               onClick={submitCode}
-              className="w-[150px] h-[50px] bg-[#6435DD] border-2 border-[#6435DD] rounded-md hover:bg-[#361D77] transition-colors shadow-md"
+              disabled={
+                Boolean(submitSubmissionId) &&
+                (!submitResult ||
+                  submitResult?.status?.toLowerCase() === "accepted")
+              }
+              className="w-[150px] h-[50px] border-2 rounded-md shadow-md flex items-center justify-center text-white font-bold transition-colors
+      bg-[#6435DD] border-[#6435DD] hover:bg-[#361D77]
+      disabled:bg-[#361D77] disabled:cursor-not-allowed disabled:opacity-70"
             >
               Submit
             </button>

@@ -7,7 +7,9 @@ function Results() {
   const [result, setResult] = useState({
     event_id: 1,
     team_id: 0,
-    name: "",
+    username1: "",
+    username2: null,
+    isjunior: false,
     level: "",
     rank: 0,
     total_score: 0,
@@ -17,16 +19,18 @@ function Results() {
 
  
 
-  // Redirect to login if not logged in
-  const curruser = JSON.parse(localStorage.getItem("currentUser"));
-  if (!curruser) {
-    window.location.href = "/login";
-  }
+  
    useEffect(() => {
-    axios
-      .get("http://localhost:3000/result/", { withCredentials: true })
-      .then((res) => setResult(res.data))
-      .catch((err) => console.error("Error fetching result:", err));
+    const fetchData = async () => {
+      try {
+        const res = await axios.get("http://localhost:3000/result/", { withCredentials: true });
+        setResult(res.data);
+      } catch (err) {
+        console.error("Error fetching result:", err);
+      }
+    };
+
+    fetchData();
   }, []);
 
   return (
@@ -48,11 +52,11 @@ function Results() {
             className="w-24 h-24 sm:w-32 sm:h-32 md:w-40 md:h-40"
           />
           <div className="font-bold text-2xl sm:text-3xl md:text-4xl text-center text-white">
-            {curruser.username || "loading..."}
+            {`${result.username1} ${result.username2 ? `& ${result.username2}` : ""}`}
           </div>
           <div className="px-4 sm:px-6 py-2 sm:py-3 rounded-lg bg-[#6453DD] flex justify-center items-center">
             <div className="font-bold text-xl sm:text-2xl md:text-3xl text-white text-center">
-              {curruser.isjunior ? "JUNIOR" : "SENIOR"}
+              {result.isjunior ? "JUNIOR" : "SENIOR"}
             </div>
           </div>
         </div>

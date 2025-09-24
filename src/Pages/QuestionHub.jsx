@@ -23,8 +23,8 @@ const QuestionHub = () => {
   }, []);
 
   //mapping to code editor
-  const handleQuestionClick = (Index) => {
-    navigate("/codeeditor", { state: { questionIndex: Index } });
+  const handleQuestionClick = (problem_id) => {
+    navigate("/codeeditor", { state: { problem_id } });
   };
 
   return (

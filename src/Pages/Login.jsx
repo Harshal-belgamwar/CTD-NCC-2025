@@ -18,14 +18,19 @@ const Login = () => {
     e.preventDefault();
     setLoading(true);
     try {
+      console.log("first");
       const response = await axios.post(
         "http://localhost:3000/user/login",
         formData,
         { withCredentials: true }
       );
 
-      if (response.data.user) {
+      console.log(response);
+
+      if (response?.status === 200) {
         console.log("Login successful:", response.data);
+
+
         localStorage.setItem("currentUser", JSON.stringify(response.data.user));
 
         const enterFullscreen = async () => {
@@ -40,22 +45,37 @@ const Login = () => {
           }
         };
 
-        
         setTimeout(() => {
           enterFullscreen();
         }, 2000);
 
-        toast.success("Login successful!", {
+        toast.success(response.data.message, {
           position: "top-center",
-          autoClose: 200,
+          autoClose: 2000,
         });
 
         navigate("/instructions");
-
-       
       }
     } catch (err) {
-      toast.error(err.response?.data?.message || "Invalid credential", {
+      console.log("Harshal ",err);
+      if (err.response?.status === 501) {
+        toast.error(err.response.data.message, {
+          position: "top-center",
+          autoClose: 2000,
+        });
+        navigate("/results");
+        return;
+      }
+
+      if (err.response?.status === 400) {
+        toast.error(err.response.data.error, {
+          position: "top-center",
+          autoClose: 2000,
+        });
+        return;
+      }
+
+      toast.error(err.response?.data?.error, {
         position: "top-center",
         autoClose: 2000,
       });
@@ -89,6 +109,7 @@ const Login = () => {
               type="text"
               id="username"
               autoComplete="off"
+              required
               value={formData.username}
               className="w-full px-4 py-3 bg-black/30 border-[2px] border-[#6435DD]/50 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6435DD]"
               onChange={(e) =>
@@ -107,6 +128,7 @@ const Login = () => {
             <input
               type="password"
               id="password"
+              required
               autoComplete="new-password"
               value={formData.password}
               className="w-full px-4 py-3 bg-black/30 border-[2px] border-[#6435DD]/50 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6435DD]"
