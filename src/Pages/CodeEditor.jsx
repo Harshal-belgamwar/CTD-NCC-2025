@@ -6,6 +6,7 @@ import axios from "axios";
 import { useLocation, useNavigate } from "react-router-dom";
 import file from "../assets/file.svg";
 import { io } from "socket.io-client";
+import SubmitCodeBox from "./SubmitCodeBox";
 
 const BACKEND_URL = "http://localhost:3000";
 
@@ -30,6 +31,10 @@ const CodeEditor = () => {
   const [submitResult, setSubmitResult] = useState(null);
   const [submitSubmissionId, setSubmitSubmissionId] = useState(null);
 
+  const [userSubmissions, setUserSubmissions] = useState([]);
+  const [selectedCode, setSelectedCode] = useState(null);
+  const [activeTab, setActiveTab] = useState("description");
+
   const leftColRef = useRef(null);
   const [editorHeight, setEditorHeight] = useState("500px");
 
@@ -53,6 +58,8 @@ int main() {
 }`,
     python: `print("Hello, World!")`,
   };
+
+  //fetch submissions
 
   // Fetch question
   useEffect(() => {
@@ -227,6 +234,22 @@ int main() {
     }
   };
 
+  const fetchSubmissions = async () => {
+    try {
+      const res = await axios.get(`${BACKEND_URL}/user/gethistory`, {
+        withCredentials: true,
+      });
+
+      const filterData = res.data.filter(
+        (submission) => submission.problem_id === questionIndex
+      );
+      console.log("User submissions:", filterData);
+      setUserSubmissions(filterData);
+    } catch (err) {
+      console.error("Error fetching submissions:", err);
+    }
+  };
+
   return (
     <div className="flex flex-col w-full min-h-screen bg-gradient-to-b from-[#2A2255] to-[#0C091F] p-4 sm:p-6">
       <nav>
@@ -247,11 +270,32 @@ int main() {
         </select>
       </div>
 
-      <div className="w-full lg:w-1/2 flex flex-row gap-3  h-[30%] border border-white mt-5 p-4 text-white">
-        <div className="w-[20%] bg-[#2A2255] h-full flex justify-center">
+      {/* description and submission */}
+      <div className="w-full lg:w-1/2 flex flex-row gap-3 h-[30%] border border-[#2A2255] mt-5 p-4 text-white">
+        <div
+          className={`w-[20%] h-full flex justify-center items-center cursor-pointer p-3 rounded-lg transition-all duration-300
+      ${
+        activeTab === "description"
+          ? "bg-[#6435DD] border-2 border-[#6435DD] text-white"
+          : "bg-[#2A2255] text-gray-300 hover:bg-[#392d72]"
+      }`}
+          onClick={() => setActiveTab("description")}
+        >
           Description
         </div>
-        <div className="w-[30%] bg-[#2A2255] h-full flex justify-center">
+
+        <div
+          className={`w-[30%] h-full flex justify-center items-center cursor-pointer p-3 rounded-lg transition-all duration-300
+      ${
+        activeTab === "submissions"
+          ? "bg-[#6435DD] border-2 border-[#6435DD] text-white"
+          : "bg-[#2A2255] text-gray-300 hover:bg-[#392d72]"
+      }`}
+          onClick={() => {
+            setActiveTab("submissions");
+            fetchSubmissions();
+          }}
+        >
           Submissions
         </div>
       </div>
@@ -262,75 +306,165 @@ int main() {
           className="w-full lg:w-1/2 h-full flex flex-col overflow-y-auto p-6 bg-[#0C091F]/40 rounded-lg shadow-md"
           ref={leftColRef}
         >
-          <div className="flex justify-between">
-            <h2 className="orbitron text-xl sm:text-2xl md:text-3xl text-white font-bold">
-              {question?.title || "Sample Problem Title"}
-            </h2>
-            {localStorage.getItem(`solved_${questionIndex}`) === "solved" && (
-              <div>
-                <img
-                  src={file}
-                  alt="Solved"
-                  className=" w-8 h-8 mb-2 rounded-full "
-                />
+          {/* // Description Tab */}
+          {activeTab === "description" && (
+            <>
+              <div className="flex justify-between">
+                <h2 className="orbitron text-xl sm:text-2xl md:text-3xl text-white font-bold">
+                  {question?.title || "Sample Problem Title"}
+                </h2>
+                {localStorage.getItem(`solved_${questionIndex}`) ===
+                  "solved" && (
+                  <div>
+                    <img
+                      src={file}
+                      alt="Solved"
+                      className=" w-8 h-8 mb-2 rounded-full "
+                    />
+                  </div>
+                )}
               </div>
-            )}
-          </div>
 
-          <p className="orbitron mt-3 text-lg font-semibold sm:text-base md:text-base text-white">
-            Score: {question?.score || 0}
-          </p>
-          <p className="oxanium mt-5 text-base sm:text-lg text-white leading-relaxed">
-            {question?.description || "Sample Problem Description"}
-          </p>
+              <p className="orbitron mt-3 text-lg font-semibold sm:text-base md:text-base text-white">
+                Score: {question?.score || 0}
+              </p>
+              <p className="oxanium mt-5 text-base sm:text-lg text-white leading-relaxed">
+                {question?.description || "Sample Problem Description"}
+              </p>
 
-          {/* Input / Output / Constraints */}
-          <div className="mt-4 text-base sm:text-base space-y-2 oxanium">
-            <p className="text-white mt-4 font-semibold">Input Format:</p>
-            <p className="text-white ml-2">
-              {question?.input_format || "sample input format"}
-            </p>
-            <p className="text-white mt-4 font-semibold">Output Format:</p>
-            <p className="text-white ml-2">
-              {question?.output_format || "sample output format"}
-            </p>
-            <p className="text-white mt-4 font-semibold">Constraints:</p>
-            <p className="text-white ml-2">
-              {question?.constraints || "sample constraints"}
-            </p>
-          </div>
+              {/* Input / Output / Constraints */}
+              <div className="mt-4 text-base sm:text-base space-y-2 oxanium">
+                <p className="text-white mt-4 font-semibold">Input Format:</p>
+                <p className="text-white ml-2">
+                  {question?.input_format || "sample input format"}
+                </p>
+                <p className="text-white mt-4 font-semibold">Output Format:</p>
+                <p className="text-white ml-2">
+                  {question?.output_format || "sample output format"}
+                </p>
+                <p className="text-white mt-4 font-semibold">Constraints:</p>
+                <p className="text-white ml-2">
+                  {question?.constraints || "sample constraints"}
+                </p>
+              </div>
 
-          {/* Test Cases */}
-          <div className="oxanium mt-8 text-base sm:text-base text-white font-semibold">
-            Test Cases
-            <div className="w-full mt-3 space-y-4">
-              {question?.samples?.map((tc, index) => (
-                <div
-                  key={index}
-                  className="p-4 border border-[#6435DD] rounded-md bg-[#2A2255]/30"
-                >
-                  <p>
-                    <strong>Input:</strong>
-                    <pre className="text-white">
-                      {tc.input.replace(/\\n/g, "\n")}
-                    </pre>
-                  </p>
-                  <p>
-                    <strong>Output:</strong>
-                    <pre className="text-white">
-                      {tc.output.replace(/\\n/g, "\n")}
-                    </pre>
-                  </p>
-                  <p>
-                    <strong>Explanation:</strong>
-                    <pre className="text-white">
-                      {tc.explanation.replace(/\\n/g, "\n")}
-                    </pre>
-                  </p>
+              {/* Test Cases */}
+              <div className="oxanium mt-8 text-base sm:text-base text-white font-semibold">
+                Test Cases
+                <div className="w-full mt-3 space-y-4">
+                  {question?.samples?.map((tc, index) => (
+                    <div
+                      key={index}
+                      className="p-4 border border-[#6435DD] rounded-md bg-[#2A2255]/30 space-y-2"
+                    >
+                      <div>
+                        <strong>Input:</strong>
+                        <pre className="text-white">
+                          {tc.input.replace(/\\n/g, "\n")}
+                        </pre>
+                      </div>
+                      <div>
+                        <strong>Output:</strong>
+                        <pre className="text-white">
+                          {tc.output.replace(/\\n/g, "\n")}
+                        </pre>
+                      </div>
+                      <div>
+                        <strong>Explanation:</strong>
+                        <pre className="text-white">
+                          {tc.explanation.replace(/\\n/g, "\n")}
+                        </pre>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              ))}
+              </div>
+            </>
+          )}
+          {/* Submissions Tab */}
+          {activeTab === "submissions" && (
+            <div className="space-y-4">
+              <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-200">
+                Submissions
+              </h3>
+
+              <div className="space-y-3">
+                {userSubmissions.length > 0 ? (
+                  userSubmissions.map((submission, index) => (
+                    <div
+                      key={index}
+                      onClick={() => setSelectedCode(submission.code)}
+                      className="bg-white dark:bg-[#0C091F]/40 rounded-lg border border-gray-200 dark:border-gray-700 p-4 shadow-sm hover:shadow-md transition-shadow"
+                    >
+                      <div className="flex items-center justify-between gap-4">
+                        {/* Language Badge */}
+                        <div className="flex-shrink-0">
+                          <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+                            {submission.language}
+                          </span>
+                        </div>
+
+                        {/* Status Badge */}
+                        <div className="flex-shrink-0">
+                          <span
+                            className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
+                              submission.result
+                                .toLowerCase()
+                                .includes("pass") ||
+                              submission.result
+                                .toLowerCase()
+                                .includes("accepted") ||
+                              submission.result
+                                .toLowerCase()
+                                .includes("success")
+                                ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
+                                : submission.result
+                                    .toLowerCase()
+                                    .includes("fail") ||
+                                  submission.result
+                                    .toLowerCase()
+                                    .includes("reject") ||
+                                  submission.result
+                                    .toLowerCase()
+                                    .includes("error")
+                                ? "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200"
+                                : "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200"
+                            }`}
+                          >
+                            Status: {submission.result}
+                          </span>
+                        </div>
+
+                        {/* Timestamp */}
+                        <div className="oxanium flex-shrink-0 text-sm text-gray-500 dark:text-gray-400">
+                          {new Date(submission.submitted_at).toLocaleTimeString(
+                            [],
+                            { hour12: false }
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="text-center py-8">
+                    <div className="text-gray-500 dark:text-gray-400 text-lg">
+                      No submissions yet.
+                    </div>
+                    <p className="text-sm text-gray-400 dark:text-gray-500 mt-2">
+                      Your code submissions will appear here once you start
+                      solving problems.
+                    </p>
+                  </div>
+                )}
+              </div>
+              {selectedCode && (
+                <SubmitCodeBox
+                  question={{ code: selectedCode }} // pass code as question object
+                  onClose={() => setSelectedCode(null)} // close box
+                />
+              )}
             </div>
-          </div>
+          )}
         </div>
 
         {/* Right column */}
@@ -444,8 +578,6 @@ int main() {
                     }
                   )}
                 </div>
-
-                
               </div>
             ) : (
               // Custom/Test Case Input with Output

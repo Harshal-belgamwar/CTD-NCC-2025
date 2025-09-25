@@ -8,14 +8,18 @@ import Results from "./Pages/Results";
 import { useEffect } from "react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css"; // Import the CSS for toast notifications
+import FullscreenMonitor from "./Pages/FullscreenMonitor";
+import SubmitCodeBox from "./Pages/SubmitCodeBox";
 
 function App() {
-  // 2. Uncomment the entire useEffect hook to activate the proctoring logic
+  
   useEffect(() => {
     //  Disable right-click and text selection
     const disable = (e) => e.preventDefault();
     document.addEventListener("contextmenu", disable);
     document.addEventListener("selectstart", disable);
+
+    
 
     // Disable clipboard actions
     document.addEventListener("copy", disable);
@@ -43,7 +47,6 @@ function App() {
     };
     document.addEventListener("visibilitychange", handleVisibility);
 
-    // ✅ Cleanup function to remove event listeners when the component unmounts
     return () => {
       document.removeEventListener("contextmenu", disable);
       document.removeEventListener("selectstart", disable);
@@ -53,7 +56,7 @@ function App() {
       document.removeEventListener("keydown", blockKeys);
       document.removeEventListener("visibilitychange", handleVisibility);
     };
-  }, []); // The empty dependency array [] ensures this effect runs only once
+  }, []); 
 
   return (
     <div>
@@ -66,6 +69,9 @@ function App() {
         pauseOnHover
         draggable
       />
+
+      <FullscreenMonitor />
+    
       <Routes>
         <Route path="/" element={<Login />} />
         <Route path="/instructions" element={<Instructions />} />
@@ -73,6 +79,8 @@ function App() {
         <Route path="/codeeditor" element={<CodeEditor />} />
         <Route path="/leaderboard" element={<Leaderboard />} />
         <Route path="/results" element={<Results />} />
+        <Route path="/submitcodebox" element={<SubmitCodeBox />} />
+
       </Routes>
     </div>
   );

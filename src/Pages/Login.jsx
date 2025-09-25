@@ -33,6 +33,8 @@ const Login = () => {
 
         localStorage.setItem("currentUser", JSON.stringify(response.data.user));
 
+        
+
         const enterFullscreen = async () => {
           const elem = document.documentElement;
           try {
@@ -51,7 +53,7 @@ const Login = () => {
 
         toast.success(response.data.message, {
           position: "top-center",
-          autoClose: 2000,
+          autoClose: 1000,
         });
 
         navigate("/instructions");
