@@ -8,7 +8,10 @@ import file from "../assets/file.svg";
 import { io } from "socket.io-client";
 import SubmitCodeBox from "./SubmitCodeBox";
 
-const BACKEND_URL = "http://localhost:3000";
+
+const API_URL = import.meta.env.VITE_API_URL;
+
+const BACKEND_URL = `${API_URL}`;
 
 function encodeBase64(str) {
   const encoder = new TextEncoder();
