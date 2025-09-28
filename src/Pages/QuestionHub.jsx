@@ -3,6 +3,8 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../Components/Navbar";
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 const QuestionHub = () => {
   const [accuracy, setAccuracy] = useState([]);
 
@@ -12,7 +14,7 @@ const QuestionHub = () => {
   useEffect(() => {
     const getQuestions = async () => {
       const response = await axios.get(
-        "http://localhost:3000/problems/accuracy",
+        `${API_URL}/problems/accuracy`,
         {
           withCredentials: true,
         }

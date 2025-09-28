@@ -1,5 +1,7 @@
 import { NavLink, useNavigate } from "react-router-dom";
 import axios from "axios";
+// In React/Vite
+const API_URL = import.meta.env.VITE_API_URL;
 
 const Navbar = () => {
   const navigate = useNavigate();
@@ -12,7 +14,7 @@ const Navbar = () => {
       }
     }
     await axios.post(
-      "http://localhost:3000/user/logout",
+      `${API_URL}/user/logout`,
       {},
       {
         withCredentials: true,

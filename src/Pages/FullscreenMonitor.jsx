@@ -3,6 +3,8 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { toast } from "react-toastify";
 import axios from "axios";
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 const FullscreenMonitor = () => {
   const [exitCount, setExitCount] = useState(0);
   const navigate = useNavigate();
@@ -29,7 +31,7 @@ const FullscreenMonitor = () => {
     }
     setExitCount(0); // Reset state
     await axios.post(
-      "http://localhost:3000/user/logout",
+      `${API_URL}/user/logout`,
       {},
       {
         withCredentials: true,

@@ -4,6 +4,8 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 const Login = () => {
   const [formData, setFormData] = useState({
     username: "",
@@ -20,7 +22,7 @@ const Login = () => {
     try {
       console.log("first");
       const response = await axios.post(
-        "http://localhost:3000/user/login",
+        `${API_URL}/user/login`,
         formData,
         { withCredentials: true }
       );
