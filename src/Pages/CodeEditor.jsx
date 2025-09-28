@@ -314,7 +314,7 @@ int main() {
       <div className="w-full flex flex-col lg:flex-row gap-6 p-4 ">
         {/* Left column */}
         <div
-          className="w-full lg:w-1/2  flex flex-col overflow-y-auto p-6 bg-[#0C091F]/40 rounded-lg shadow-md h-[calc(100vh-300px)]"
+          className="w-full lg:w-1/2  flex flex-col overflow-y-auto p-6 bg-[#0C091F]/40 rounded-lg shadow-md h-fit"
           ref={leftColRef}
         >
           {/* // Description Tab */}
@@ -482,7 +482,7 @@ int main() {
         <div className="w-full lg:w-1/2 flex flex-col gap-4">
           {/* Code editor */}
           <div
-            className="w-full border border-[#6435DD] flex flex-col bg-[#2A0E5E] rounded-lg shadow-md"
+            className=" w-full border border-[#6435DD] flex flex-col bg-[#2A0E5E] rounded-lg shadow-md"
             style={{ height: editorHeight }}
           >
             <Editor

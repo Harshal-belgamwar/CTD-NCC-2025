@@ -20,7 +20,7 @@ const Login = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      console.log("first");
+     
       const response = await axios.post(
         `${API_URL}/user/login`,
         formData,
@@ -30,7 +30,7 @@ const Login = () => {
       console.log(response);
 
       if (response?.status === 200) {
-        console.log("Login successful:", response.data);
+        
 
 
         localStorage.setItem("currentUser", JSON.stringify(response.data.user));
@@ -45,7 +45,7 @@ const Login = () => {
         navigate("/instructions");
       }
     } catch (err) {
-      console.log("Harshal ",err);
+      
       if (err.response?.status === 501) {
         toast.error(err.response.data.message, {
           position: "top-center",
