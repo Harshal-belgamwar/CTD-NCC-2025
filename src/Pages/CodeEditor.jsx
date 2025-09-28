@@ -25,6 +25,7 @@ const CodeEditor = () => {
 
   const [output, setOutput] = useState("");
   const [customInput, setCustomInput] = useState("");
+ 
 
   const [code, setCode] = useState("");
   const [submissionId, setSubmissionId] = useState(null);
@@ -175,6 +176,7 @@ int main() {
 
   // Run code
   const runCode = async () => {
+    
     setOutput(null);
     setSubmitResult(null);
 
@@ -192,13 +194,17 @@ int main() {
       });
       const data = res.data;
       if (data.submission_id) setSubmissionId(res.data.submission_id);
+      setTimeout(() => setSubmissionId(null), 5000);
     } catch (err) {
+      setSubmissionId(null)
       if (err.response.status === 403) {
         navigate("/results");
       }
       setOutput("Error: " + (err.response?.data?.message || err.message));
     }
   };
+
+  
 
   // Submit code
   const submitCode = async () => {
@@ -221,7 +227,9 @@ int main() {
 
       // Save submission_id to trigger useEffect
       setSubmitSubmissionId(res.data.submission_id);
+      setTimeout(() => setSubmitSubmissionId(null), 5000);
     } catch (err) {
+      setSubmitSubmissionId(null)
       if (err.response.status === 403) {
         navigate("/results");
       }
@@ -300,10 +308,10 @@ int main() {
         </div>
       </div>
 
-      <div className="w-full flex flex-col lg:flex-row gap-6 p-4">
+      <div className="w-full flex flex-col lg:flex-row gap-6 p-4 ">
         {/* Left column */}
         <div
-          className="w-full lg:w-1/2 h-full flex flex-col overflow-y-auto p-6 bg-[#0C091F]/40 rounded-lg shadow-md"
+          className="w-full lg:w-1/2  flex flex-col overflow-y-auto p-6 bg-[#0C091F]/40 rounded-lg shadow-md h-[calc(100vh-300px)]"
           ref={leftColRef}
         >
           {/* // Description Tab */}
@@ -359,19 +367,19 @@ int main() {
                     >
                       <div>
                         <strong>Input:</strong>
-                        <pre className="text-white">
+                        <pre className="text-white whitespace-pre-wrap break-words">
                           {tc.input.replace(/\\n/g, "\n")}
                         </pre>
                       </div>
                       <div>
                         <strong>Output:</strong>
-                        <pre className="text-white">
+                        <pre className="text-white whitespace-pre-wrap break-words">
                           {tc.output.replace(/\\n/g, "\n")}
                         </pre>
                       </div>
                       <div>
                         <strong>Explanation:</strong>
-                        <pre className="text-white">
+                        <pre className="text-white whitespace-pre-wrap break-words">
                           {tc.explanation.replace(/\\n/g, "\n")}
                         </pre>
                       </div>

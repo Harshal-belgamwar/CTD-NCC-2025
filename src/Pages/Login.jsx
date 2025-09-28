@@ -33,23 +33,7 @@ const Login = () => {
 
         localStorage.setItem("currentUser", JSON.stringify(response.data.user));
 
-        
-
-        const enterFullscreen = async () => {
-          const elem = document.documentElement;
-          try {
-            if (elem.requestFullscreen) await elem.requestFullscreen();
-            else if (elem.webkitRequestFullscreen)
-              await elem.webkitRequestFullscreen();
-            else if (elem.msRequestFullscreen) await elem.msRequestFullscreen();
-          } catch (err) {
-            console.log("Fullscreen failed:", err);
-          }
-        };
-
-        setTimeout(() => {
-          enterFullscreen();
-        }, 2000);
+      
 
         toast.success(response.data.message, {
           position: "top-center",

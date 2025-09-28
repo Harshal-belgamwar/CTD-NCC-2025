@@ -1,4 +1,4 @@
-import { Route, Routes } from "react-router-dom";
+import { Route, Routes , useLocation } from "react-router-dom";
 import Login from "./Pages/Login";
 import Instructions from "./Pages/Instructions";
 import CodeEditor from "./Pages/CodeEditor";
@@ -12,6 +12,13 @@ import FullscreenMonitor from "./Pages/FullscreenMonitor";
 import SubmitCodeBox from "./Pages/SubmitCodeBox";
 
 function App() {
+
+    const location = useLocation();
+
+  // Pages where FullscreenMonitor should NOT appear
+  const excludedPages = ["/", "/instructions"];
+  const showFullscreenMonitor = !excludedPages.includes(location.pathname);
+
   
   useEffect(() => {
     //  Disable right-click and text selection
@@ -70,7 +77,7 @@ function App() {
         draggable
       />
 
-      <FullscreenMonitor />
+      {showFullscreenMonitor && <FullscreenMonitor />}
     
       <Routes>
         <Route path="/" element={<Login />} />
